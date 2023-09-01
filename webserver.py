@@ -1,8 +1,10 @@
+import json
 import whois
 import passwords
 import encryption
 import packages as pkg
 import random
+import datetime
 from database import queryDB, writeDB
 pkg.install('flask') # pip install flask
 from flask import Flask, render_template, redirect, url_for, request, session, flash  # import flask
@@ -68,17 +70,37 @@ def checkLogin():
 
 
 ## whois lookup
+@app.template_filter('fromJson')
+def parseJson(jsonStr):
+    return json.loads(jsonStr.replace("'", "\""))
+
+@app.template_filter('toLocateDateTime')
+def toLocateDateTime(timestamp):
+    if (type(timestamp) == list):
+        output = list()
+        for entry in timestamp:
+            output.append(toLocateDateTime(entry))
+        return output
+
+    if (type(timestamp) != str):
+        timestamp = str(timestamp)
+    return datetime.datetime.fromisoformat(timestamp).astimezone().strftime("%m/%d/%Y")
+
 @app.route("/whois/list", methods=["GET"])
 def whois_list():
     if (checkLogin() == False):
         return redirect(url_for("login"))
     if request.args.get('domain') != None:
         domain = request.args.get('domain')
-        whoisData = whois.whois(domain)
-        try:
-            writeDB(sqliteFileName, "insert into domainsByUser (user, domain, whoisValue) values (?, ?, ?)", (session["user"], domain, str(whoisData)))
-        except:
-            flash("Domain already exists.")
+        if (queryDB(sqliteFileName, "SELECT count(domain) from domainsByUser WHERE domain = ? AND user = ?", (domain, session["user"]))[0][0] == 0):
+            whoisData = whois.whois(domain)
+            try:
+                writeDB(sqliteFileName, "insert into domainsByUser (user, domain, whoisValue) values (?, ?, ?)", (session["user"], domain, str(whoisData)))
+                flash("Domain Added: " + domain)
+            except:
+                flash("Write failed for domain " + domain + ". See logs for more details.")
+        else:
+            flash("Domain already exists: " + domain)
     return render_template("whois_list.html", domains=queryDB(sqliteFileName, "select domain, whoisValue from domainsByUser where user = ?", (session["user"],)))
 
 @app.route("/whois/lookup", methods=["GET"])
@@ -94,3 +116,24 @@ def whois_start():
     else:
         whoisData = whois.whois(domain)
     return render_template("whois.html", domain=domain, whoisData=str(whoisData))
+
+@app.route("/whois/refresh", methods=["GET"])
+def whois_refresh():
+    if (checkLogin() == False):
+        return redirect(url_for("login"))
+    if request.args.get('domain') != None:
+        domain = request.args.get('domain')
+        whoisData = whois.whois(domain)
+        writeDB(sqliteFileName, "update domainsByUser set whoisValue = ? where domain = ?", (str(whoisData), domain))
+        flash("Domain Refreshed: " + domain)
+    return redirect(url_for("whois_list"))
+
+@app.route("/whois/delete", methods=["GET"])
+def whois_delete():
+    if (checkLogin() == False):
+        return redirect(url_for("login"))
+    if request.args.get('domain') != None:
+        domain = request.args.get('domain')
+        writeDB(sqliteFileName, "delete from domainsByUser where domain = ? and user = ?", (domain, session["user"]))
+        flash("Domain Deleted: " + domain)
+    return redirect(url_for("whois_list"))

@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
+{% block title %} My Domains {% endblock %}
+{% block header %} My Domains {% endblock %}
+
 {% block content %}
-    <h1>{% block title %} My Whois {% endblock %}</h1>
     <form method="GET">
         <fieldset>
             <label for="domain">Domain</label>
@@ -10,14 +12,37 @@
         </fieldset>
     </form>
     {% if domains %}
-        <ul class=domains>
+        <table class=domains>
+            <tr>
+                <th>Domain Name</th>
+                <th>Registrar</th>
+                <th>Created</th>
+                <th>Renewed</th>
+                <th>Expiration</th>
+                <th>DNS Servers</th>
+                <th>JSON Data</th>
+                <th>Refresh</th>
+                <th>Delete</th>
+            </tr>
         {% for lookedUpDomain, whoisValue in domains %}
-        <li>{{ lookedUpDomain }}
-            <br>
-            <pre>{{ whoisValue }}</pre>
-        </li>
+            {% set whoisValueParsed = whoisValue|fromJson %}
+        <tr>
+            <td class="domain-list-name">{{ lookedUpDomain }}</td>
+            <td class="domain-list-registrar">{{ whoisValueParsed.registrar }}</td>
+            <td class="domain-list-created">{{ whoisValueParsed.creation_date|toLocateDateTime }}</td>
+            <td class="domain-list-renewed">{{ whoisValueParsed.updated_date|toLocateDateTime }}</td>
+            <td class="domain-list-expiration">{{ whoisValueParsed.expiration_date|toLocateDateTime }}</td>
+            <td class="domain-list-dns"><ul>
+                {% for server in whoisValueParsed.name_servers %}
+                    <li>{{ server }}</li><br>
+                {% endfor %}
+            </ul></td>
+            <td class="domain-list-json"><textarea readonly>{{ whoisValue }}</textarea></td>
+            <td class="domain-list-actions"><a href="{{ url_for('whois_refresh') }}?domain={{ lookedUpDomain }}">Refresh</a></td>
+            <td class="domain-list-actions"><a href="{{ url_for('whois_delete') }}?domain={{ lookedUpDomain }}">Delete</a></td>
+        </tr>
         {% endfor %}
-        </ul>
+        </table>
     {% endif %}
 
 {% endblock %}

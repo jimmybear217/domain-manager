@@ -1,0 +1,40 @@
+@charset "UTF-8";
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+header h1, header li, header a {
+    display: inline-block;
+    text-align: center;
+}
+
+header h1, header, nav {
+    text-align: center;    
+    width: 100%;
+}
+
+header nav ul {
+    list-style:none;
+    padding: 0;
+}
+
+header nav ul a {
+    margin: auto 1%;
+}
+header nav ul li {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+}
+
+a:visited, a:link {
+    color: currentcolor;
+    text-decoration: none;
+}
+
+a:hover, a:active {
+    color: blue;
+    text-decoration: underline 1px currentColor;
+}
