@@ -26,4 +26,4 @@ else:
 # run webserver
 # webserver.app.run(host=webserverHost, port=webserverPort)
 serve(webserver.app, host=webserverHost, port=webserverPort)
-print("Webserver running on " + webserverHost + ":" + str(webserverPort) + "...")
+print("Goodbye!")
