@@ -40,7 +40,7 @@ if (len(sqliteTables.fetchall()) == 0):
 # run webserver
 # webserver.app.run(host=webserverHost, port=webserverPort)
 print("Starting webserver on " + webserverHost + ":" + str(webserverPort) + "...")
-webserver.  (sqliteHandle)
+webserver.passSqliteHandle(sqliteHandle)
 serve(webserver.app, host=webserverHost, port=webserverPort)
 print("Goodbye!")
 
