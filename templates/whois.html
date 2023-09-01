@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Whois {% endblock %}</h1>
+    <form method="GET">
+        <fieldset>
+            <label for="domain">Domain</label>
+            <input type="text" name="domain" id="domain" placeholder="example.com" value="{{ domain }}">
+            <input type="submit" value="Submit">
+        </fieldset>
+    </form>
+    {% if domain != "" %}
+        <h2>Whois for {{ domain }}</h2>
+        <pre>{{ whoisData }}</pre>
+    {% endif %}
+{% endblock %}
