@@ -8,9 +8,22 @@
     <nav>
         <ul>
             <a href="{{ url_for('index') }}"><li>Home</li></a>
-            <a href="{{ url_for('whois_start') }}"><li>Whois</li></a>
+            <a href="{{ url_for('whois_start') }}"><li>Whois Lookup</li></a>
+            <a href="{{ url_for('whois_list') }}"><li>My Whois</li></a>
+            <a href="{{ url_for('logout') }}"><li>Logout</li></a>
         </ul>
     </nav>
+    <header>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </header>
     {% block header %} {% endblock %}
     <div class="content">
         {% block content %} {% endblock %}

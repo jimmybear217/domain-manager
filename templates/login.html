@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Login {% endblock %}</h1>
+    <form method="POST" action="{{ url_for('login')}}">
+        <fieldset>
+            <legend>Login</legend>
+            <input type="text" name="username" placeholder="Username">
+            <input type="password" name="password" placeholder="Password">
+            <input type="submit" value="Log in">
+        </fieldset>
+    </form>
+    <form method="POST" action="{{ url_for('register')}}">
+        <fieldset>
+            <legend>Register</legend>
+            <input type="text" name="username" placeholder="Username">
+            <input type="password" name="password" placeholder="Password">
+            <input type="submit" value="Register">
+        </fieldset>
+    </form>
+{% endblock %}
