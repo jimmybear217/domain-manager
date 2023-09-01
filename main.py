@@ -24,5 +24,5 @@ else:
     exit(1)
 
 # run webserver
-webserver.app.run(host=webserverHost, port=webserverPort)
-# serve(webserver.app, host=webserverHost, port=webserverPort)
+# webserver.app.run(host=webserverHost, port=webserverPort)
+serve(webserver.app, host=webserverHost, port=webserverPort)
