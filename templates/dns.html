@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %} DNS Lookup {% endblock %}
+{% block header %} DNS Lookup {% endblock %}
+
+{% block content %}
+    <form method="GET">
+        <fieldset>
+            <label for="domain">Domain</label>
+            <input type="text" name="domain" placeholder="example.com" value="{{ domain }}">
+            <select name="recordType" value="{{ recordType }}">
+                <option value=""></option>
+                <option value="A">A</option>
+                <option value="AAAA">AAAA</option>
+                <option value="CNAME">CNAME</option>
+                <option value="MX">MX</option>
+                <option value="NS">NS</option>
+                <option value="PTR">PTR</option>
+                <option value="SOA">SOA</option>
+                <option value="SRV">SRV</option>
+                <option value="TXT">TXT</option>
+            </select>
+            <input type="text" name="nameServer" placeholder="1.1.1.1 (optional)" value="{{ nameServer }}">
+            <input type="submit" value="Submit">
+        </fieldset>
+    </form>
+    {% if domain != "" %}
+        <h2>DNS Query for {{ recordType }} {{ domain }} @ {{ nameServer }}</h2>
+        <pre>{{ dnsData }}</pre>
+    {% endif %}
+{% endblock %}

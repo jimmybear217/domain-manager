@@ -81,18 +81,28 @@ form.horizonal input[type=submit] {
 
 #notification-area .notificationFlash {
     transition: 1s;
-    background-color: #4CAF50;
+    background-color: #4c82af;
     display: block;
     padding: 10px;
     font-size: 1em;
     color: white;
     font-weight: bold;
-    border: #009688 2px solid;
+    border: #005f96 2px solid;
     border-radius: 5px;
     margin: 1%;
     min-width: 300px;
     height: unset;
     transform: unset;
+}
+
+#notification-area .notificationFlash.success {
+    background-color: #4CAF50;
+    border-color: #009688;
+}
+
+#notification-area .notificationFlash.error {
+    background-color: #f44336;
+    border-color: #d32f2f;
 }
 
 #notification-area .notificationFlash.appearing {

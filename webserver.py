@@ -5,9 +5,13 @@ import encryption
 import packages as pkg
 import random
 import datetime
+import re
+import socket
 from database import queryDB, writeDB
 pkg.install('flask') # pip install flask
 from flask import Flask, render_template, redirect, url_for, request, session, flash  # import flask
+pkg.install('dnspython') # pip install dns.resolver
+import dns.resolver
 
 sqliteFileName = None
 def passSqliteFileName(filename):
@@ -137,3 +141,35 @@ def whois_delete():
         writeDB(sqliteFileName, "delete from domainsByUser where domain = ? and user = ?", (domain, session["user"]))
         flash("Domain Deleted: " + domain)
     return redirect(url_for("whois_list"))
+
+## DNS lookup
+def is_ip_address(ip_address):
+  regex = re.compile(r'^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$')
+  return regex.match(ip_address) is not None
+
+@app.route("/dns/lookup", methods=["GET"])
+def dns_lookup():
+    if (checkLogin() == False):
+        return redirect(url_for("login"))
+    if request.args.get('domain') != None:
+        domain = request.args.get('domain')
+        recordType = "A"
+        if request.args.get('recordType') != None:
+            recordType = request.args.get('recordType')
+        resolver = dns.resolver.Resolver()
+        if request.args.get('nameServer') not in ["", None]:
+            if is_ip_address(request.args.get('nameServer')):
+                resolver.nameservers = [request.args.get('nameServer')]
+            else:
+                resolver.nameservers = [socket.gethostbyname(request.args.get('nameServer'))]
+        try:
+            dnsData = resolver.query(domain, recordType).response.to_text()
+            flash("DNS Lookup successful.", "success")
+        except:
+            dnsData = ""
+            flash("DNS Lookup failed. Please check your domain, record type, and name server.", "error")
+        return render_template("dns.html", domain=domain, recordType=recordType, nameServer=resolver.nameservers[0], dnsData=dnsData)
+    else:
+        domain = ""
+        dnsData = "Please enter a domain."
+        return render_template("dns.html", domain=domain, dnsData=dnsData)
