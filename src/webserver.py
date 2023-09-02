@@ -22,11 +22,11 @@ app = Flask(__name__)
 
 ## set secret key for session - generate it randomly if it does not exist and encrypt it into a file
 secretKeyHandle = encryption.Encryption()
-secretKey = secretKeyHandle.decryptFile("flask.key")
+secretKey = secretKeyHandle.decryptFile("data/flask.key")
 if (secretKey == None):
     # generate key if it doesn't exist
     secretKey = random_string = ''.join(random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') for _ in range(32))
-    secretKeyHandle.encryptFile("flask.key", secretKey)
+    secretKeyHandle.encryptFile("data/flask.key", secretKey)
 app.secret_key = secretKey
 
 

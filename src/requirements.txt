@@ -2,3 +2,4 @@ python-whois
 waitress
 flask
 dnspython
+blowfish
