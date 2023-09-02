@@ -3,6 +3,7 @@
 html, body {
     margin: 0;
     padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 header h1, header li, header a {
@@ -37,4 +38,70 @@ a:visited, a:link {
 a:hover, a:active {
     color: blue;
     text-decoration: underline 1px currentColor;
+}
+
+.content {
+    text-align: center;
+    max-width: 1024px;
+    margin: 2% auto;
+}
+.content pre {
+    text-align: left;
+}
+
+.horizonal-conatiner {
+    text-align: center
+}
+
+.horizonal-conatiner .horizonal {
+    display: inline-flex;
+    margin: 1%;
+}
+
+fieldset>legend {
+    text-align: left;
+    font-size: 1.2em
+}
+
+form.horizonal input {
+    font-size: 1.1em;
+    margin: 2% 0;
+    min-width: 300px;
+}
+
+form.horizonal input[type=submit] {
+    width: 101%
+}
+
+#notification-area {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+}
+
+#notification-area .notificationFlash {
+    transition: 1s;
+    background-color: #4CAF50;
+    display: block;
+    padding: 10px;
+    font-size: 1em;
+    color: white;
+    font-weight: bold;
+    border: #009688 2px solid;
+    border-radius: 5px;
+    margin: 1%;
+    min-width: 300px;
+    height: unset;
+    transform: unset;
+}
+
+#notification-area .notificationFlash.appearing {
+    height: 0;
+    transform: translateY(200%);
+    transition: 0.5s;
+
+}
+#notification-area .notificationFlash.disappearing {
+    transition: 1s;
+    filter: opacity(0)
 }

@@ -20,13 +20,37 @@
     <div class="content">
         {% block content %} {% endblock %}
     </div>
+    <div id="notification-area"></div>
+    <script type="text/javascript">
+        var notificationCount = 0
+        function showNotification(category, message) {
+            var notif = document.createElement("div")
+            notif.className = "notificationFlash"
+            notif.innerText = message
+            notif.classList.add(category)
+            notif.classList.add("appearing")
+            setTimeout( () => {
+                document.getElementById("notification-area").appendChild(notif)
+                setTimeout( () => {
+                    notif.classList.remove("appearing")
+                }, 400)
+                setTimeout( () => {
+                    notif.classList.add("disappearing")
+                }, 3000)
+                setTimeout( () => {
+                    document.getElementById("notification-area").removeChild(notif)
+                }, 4000)
+            }, 500*notificationCount)
+            notificationCount++
+        }
+    </script>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <ul class=flashes>
+            <script>
             {% for category, message in messages %}
-            <li class="{{ category }}">{{ message }}</li>
+            showNotification("{{ category }}", "{{ message }}")
             {% endfor %}
-            </ul>
+            </script>
         {% endif %}
     {% endwith %}
     {% block footer %} {% endblock %}
