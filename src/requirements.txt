@@ -1,0 +1,4 @@
+python-whois
+waitress
+flask
+dnspython

@@ -10,7 +10,6 @@ mainDatabaseFile = 'domains.sqlite'     # database file to use for the webserver
 import packages as pkg
 pkg.install('whois')    # pip install whois
 pkg.install('waitress') # pip install waitress
-pkg.install('sqlite3')  # pip install sqlite3
 
 # import installed packages
 import whois
