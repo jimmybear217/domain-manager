@@ -16,9 +16,7 @@
             <tr>
                 <th>Domain Name</th>
                 <th>Registrar</th>
-                <th>Created</th>
-                <th>Renewed</th>
-                <th>Expiration</th>
+                <th>Dates</th>
                 <th>DNS Servers</th>
                 <th>JSON Data</th>
                 <th>Refresh</th>
@@ -29,9 +27,11 @@
         <tr>
             <td class="domain-list-name">{{ lookedUpDomain }}</td>
             <td class="domain-list-registrar">{{ whoisValueParsed.registrar }}</td>
-            <td class="domain-list-created">{{ whoisValueParsed.creation_date|toLocateDateTime }}</td>
-            <td class="domain-list-renewed">{{ whoisValueParsed.updated_date|toLocateDateTime }}</td>
-            <td class="domain-list-expiration">{{ whoisValueParsed.expiration_date|toLocateDateTime }}</td>
+            <td class="domain-list-dates"><ul>
+                <li>Registered: {{ whoisValueParsed.creation_date|toLocateDateTime }}</li>
+                <li>Updated: {{ whoisValueParsed.updated_date|toLocateDateTime }}</li>
+                <li>Expires: {{ whoisValueParsed.expiration_date|toLocateDateTime }}</li>
+            </ul></td>
             <td class="domain-list-dns"><ul>
                 {% for server in whoisValueParsed.name_servers %}
                     <li>{{ server }}</li><br>
