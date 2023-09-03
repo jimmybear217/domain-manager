@@ -1,7 +1,8 @@
 import hashlib
 from database import queryDB, writeDB
+import config
 
-sqliteFileName= None
+sqliteFileName = config.get("mainDatabaseFile")
 
 def setSqliteFileName(filename):
     global sqliteFileName

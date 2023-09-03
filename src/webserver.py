@@ -8,15 +8,18 @@ import re
 import socket
 import virustotal_python
 from database import queryDB, writeDB
-from flask import Flask, render_template, redirect, url_for, request, session, flash  # import flask
+from flask import Flask, render_template, redirect, url_for, request, session, flash
 import dns.resolver
+import logging
+import config
 
-sqliteFileName = None
-def passSqliteFileName(filename):
-    global sqliteFileName
-    sqliteFileName = filename
-    passwords.setSqliteFileName(filename)
+## logging
+logging.basicConfig(filename=config.get("mainLogFile"), level=config.get("mainLogLevel"))
 
+## database
+sqliteFileName = config.get("mainDatabaseFile")
+
+## webserver
 app = Flask(__name__)
 
 ## set secret key for session - generate it randomly if it does not exist and encrypt it into a file
@@ -32,7 +35,9 @@ app.secret_key = secretKey
 ## main page
 @app.route("/")
 def index():
+    app.logger.debug("Index page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     return render_template("index.html", title='Home')
 
@@ -42,9 +47,11 @@ def index():
 def register():
     if request.method == "POST":
         if passwords.registerUser(request.form["username"], request.form["password"]):
+            app.logger.info("User " + request.form["username"] + " registered from ip " + request.remote_addr + ".")
             flash("Registration successful.")
             return redirect(url_for("login"))
         else:
+            app.logger.warning("User " + request.form["username"] + " registration failed from ip " + request.remote_addr + ".")
             flash("User already exists.")
     return render_template("register.html", title='Register')
 
@@ -54,14 +61,17 @@ def login():
     if request.method == "POST":
         if passwords.verifyLogin(request.form["username"], request.form["password"]):
             session["user"] = request.form["username"]
+            app.logger.info("User " + request.form["username"] + " logged in from ip " + request.remote_addr + ".")
             flash("Login successful.")
             return redirect(url_for("index"))
         else:
+            app.logger.warning("User " + request.form["username"] + " login failed from ip " + request.remote_addr + ".")
             flash("Incorrect password.")
     return render_template("login.html", title='Login')
 
 @app.route("/account/logout")
 def logout():
+    app.logger.info("User " + session.get("user", "anonymous") + " logged out from ip " + request.remote_addr + ".")
     session.pop("user", None)
     return redirect(url_for("index"))
 
@@ -72,7 +82,7 @@ def checkLogin():
         return False
 
 
-## whois lookup
+## template processors
 @app.template_filter('fromJson')
 def parseJson(jsonStr):
     return json.loads(jsonStr.replace("'", "\""))
@@ -89,10 +99,15 @@ def toLocateDateTime(timestamp):
         timestamp = str(timestamp)
     return datetime.datetime.fromisoformat(timestamp).astimezone().strftime("%m/%d/%Y")
 
+
+## whois
 @app.route("/whois/list", methods=["GET"])
 def whois_list():
+    app.logger.debug("Whois List page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
+    
     if request.args.get('domain') != None:
         domain = request.args.get('domain')
         if (queryDB(sqliteFileName, "SELECT count(domain) from domainsByUser WHERE domain = ? AND user = ?", (domain, session["user"]))[0][0] == 0):
@@ -109,7 +124,9 @@ def whois_list():
 
 @app.route("/whois/lookup", methods=["GET"])
 def whois_start():
+    app.logger.debug("Whois Query page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     domain = ""
@@ -123,8 +140,11 @@ def whois_start():
 
 @app.route("/whois/refresh", methods=["GET"])
 def whois_refresh():
+    app.logger.debug("Whois Refresh page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
+    
     if request.args.get('domain') != None:
         domain = request.args.get('domain')
         whoisData = whois.whois(domain)
@@ -134,8 +154,11 @@ def whois_refresh():
 
 @app.route("/whois/delete", methods=["GET"])
 def whois_delete():
+    app.logger.debug("Whois delete page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
+    
     if request.args.get('domain') != None:
         domain = request.args.get('domain')
         writeDB(sqliteFileName, "delete from domainsByUser where domain = ? and user = ?", (domain, session["user"]))
@@ -149,8 +172,11 @@ def is_ip_address(ip_address):
 
 @app.route("/dns/lookup", methods=["GET"])
 def dns_lookup():
+    app.logger.debug("DNS Lookup page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
+    
     if request.args.get('domain') != None:
         domain = request.args.get('domain')
         recordType = "A"
@@ -178,13 +204,18 @@ def dns_lookup():
 
 @app.route("/security", methods=["GET"])
 def security_menu():
+    app.logger.debug("Security menu page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
+    
     return render_template("security.html")
 
 @app.route("/security/virustotal", methods=["GET", "POST"])
 def security_virustotal():
+    app.logger.debug("VirusTotal page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     domain = ""
@@ -244,12 +275,18 @@ def security_virustotal():
 
 @app.route("/security/certs", methods=["GET"])
 def security_certs():
+    app.logger.debug("certs page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
+
     return render_template("certs.html")
 
 @app.route("/security/urlscan", methods=["GET"])
 def security_urlscan():
+    app.logger.debug("urlscan page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
+
     return render_template("urlscan.html")
