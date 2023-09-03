@@ -10,12 +10,25 @@
         <h1>{% block header %} {% endblock %}</h1>
         <nav>
             <ul>
-                <a href="{{ url_for('index') }}"><li>Home</li></a>
+                <!-- <a href="{{ url_for('index') }}"><li>Home</li></a> -->
                 <a href="{{ url_for('whois_start') }}"><li>Whois Lookup</li></a>
-                <a href="{{ url_for('whois_list') }}"><li>My Domains</li></a>
                 <a href="{{ url_for('dns_lookup') }}"><li>DNS Lookup</li></a>
+                <a href="{{ url_for('whois_list') }}"><li>My Domains</li></a>
+                <a href="{{ url_for('security_menu') }}"><li>Web Security</li></a>
                 <a href="{{ url_for('logout') }}"><li>Logout</li></a>
             </ul>
+            <ul id="menu_security" display="none">
+                <a href="{{ url_for('security_virustotal') }}"><li>VirusTotal</li></a>
+                <a href="{{ url_for('security_certs') }}"><li>Certificates</li></a>
+                <a href="{{ url_for('security_urlscan') }}"><li>URL Scan</li></a>
+            </ul>
+            <script type="text/javascript">
+
+                // display security menu when security path is present
+                if (document.location.pathname.includes("security")) document.getElementById("menu_security").style.display = "";
+                else document.getElementById("menu_security").style.display = "none";
+                
+            </script>
         </nav>
     </header>
     <div class="content">

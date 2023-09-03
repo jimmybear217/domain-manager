@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %} VirusTotal {% endblock %}
+{% block header %} Security: VirusTotal {% endblock %}
+
+{% block content %}
+    <fieldset>
+        <legend>VirusTotal Lookup</legend>
+        <form method="POST">
+            <input type="text" name="domain" id="domain" placeholder="example.com" value="{{ domain }}">
+            <input type="password" name="apikey" id="apikey" placeholder="API Key" value="{{ apikey }}">
+            <select name="action" id="action">
+                <option value="lookup">Lookup</option>
+                <option value="scan">scan</option>
+            </select>
+            <input type="submit" value="Submit">
+        </form>
+    </fieldset>
+    {% if domain != "" %}
+        <fieldset>
+            <legend>Results</legend>
+            <h2>VirusTotal {{ action }} for {{ domain }}</h2>
+            <pre>{{ vtData }}</pre>
+        </fieldset>
+    {% endif %}
+{% endblock %}

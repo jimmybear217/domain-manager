@@ -6,6 +6,7 @@ import random
 import datetime
 import re
 import socket
+import virustotal_python
 from database import queryDB, writeDB
 from flask import Flask, render_template, redirect, url_for, request, session, flash  # import flask
 import dns.resolver
@@ -14,6 +15,7 @@ sqliteFileName = None
 def passSqliteFileName(filename):
     global sqliteFileName
     sqliteFileName = filename
+    passwords.setSqliteFileName(filename)
 
 app = Flask(__name__)
 
@@ -39,7 +41,7 @@ def index():
 @app.route("/account/register", methods=["POST"])
 def register():
     if request.method == "POST":
-        if passwords.registerUser(request.form["username"], request.form["password"], sqliteFileName):
+        if passwords.registerUser(request.form["username"], request.form["password"]):
             flash("Registration successful.")
             return redirect(url_for("login"))
         else:
@@ -50,7 +52,7 @@ def register():
 @app.route("/account/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        if passwords.verifyLogin(request.form["username"], request.form["password"], sqliteFileName):
+        if passwords.verifyLogin(request.form["username"], request.form["password"]):
             session["user"] = request.form["username"]
             flash("Login successful.")
             return redirect(url_for("index"))
@@ -170,3 +172,50 @@ def dns_lookup():
         domain = ""
         dnsData = "Please enter a domain."
         return render_template("dns.html", domain=domain, dnsData=dnsData)
+
+## security menus
+
+@app.route("/security", methods=["GET"])
+def security_menu():
+    if (checkLogin() == False):
+        return redirect(url_for("login"))
+    return render_template("security.html")
+
+@app.route("/security/virustotal", methods=["GET", "POST"])
+def security_virustotal():
+    if (checkLogin() == False):
+        return redirect(url_for("login"))
+    domain = ""
+    if (request.method == "POST" and request.form['domain'] != None):
+        domain = request.form['domain']
+    apikey = ""
+    if (request.method == "POST" and request.form['apikey'] != None):
+        apikey = request.form['apikey']
+    # else:
+    #     apikey = passwords.getVTApiKey()
+    action = ""
+    if (request.method == "POST" and request.form['action'] != None):
+        action = request.form['action']
+    vt_data = ""
+    if (domain != "" and apikey != "" and action != ""):
+        try:
+            with virustotal_python.Virustotal(API_KEY=apikey, API_VERSION=2) as vtotal:
+                resp = vtotal.request(f"domains/{domain}")
+                vt_data=resp.data
+                flash("VirusTotal Lookup successful.", "success")
+        except:
+            flash("VirusTotal Lookup failed. Please check your domain, API key, and action.", "error")
+            vt_data="Error"
+    return render_template("virustotal.html", domain=domain, apikey=apikey, action=action, vt_data=vt_data)
+
+@app.route("/security/certs", methods=["GET"])
+def security_certs():
+    if (checkLogin() == False):
+        return redirect(url_for("login"))
+    return render_template("certs.html")
+
+@app.route("/security/urlscan", methods=["GET"])
+def security_urlscan():
+    if (checkLogin() == False):
+        return redirect(url_for("login"))
+    return render_template("urlscan.html")
