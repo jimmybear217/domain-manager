@@ -42,7 +42,6 @@ a:hover, a:active {
 
 .content {
     text-align: center;
-    max-width: 1024px;
     margin: 2% auto;
 }
 .content pre {
@@ -56,6 +55,12 @@ a:hover, a:active {
 .horizonal-conatiner .horizonal {
     display: inline-flex;
     margin: 1%;
+}
+
+.fixedwidth {
+    width: 100%;
+    max-width: 1024px;
+    margin: auto;
 }
 
 fieldset>legend {
@@ -119,4 +124,32 @@ form.horizonal input[type=submit] {
 #notification-area .notificationFlash.disappearing {
     transition: 1s;
     filter: opacity(0)
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: center;
+    margin: auto;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+table th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+table tr:hover {
+    background-color: #ddd;
+}
+
+table td {
+    padding: 5px;
 }

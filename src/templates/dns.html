@@ -5,7 +5,7 @@
 
 {% block content %}
     <form method="GET">
-        <fieldset>
+        <fieldset class="fixedwidth">
             <label for="domain">Domain</label>
             <input type="text" name="domain" placeholder="example.com" value="{{ domain }}">
             <select name="recordType" value="{{ recordType }}">
@@ -25,6 +25,6 @@
     </form>
     {% if domain != "" %}
         <h2>DNS Query for {{ recordType }} {{ domain }} @ {{ nameServer }}</h2>
-        <pre>{{ dnsData }}</pre>
+        <pre class="fixedwidth">{{ dnsData }}</pre>
     {% endif %}
 {% endblock %}

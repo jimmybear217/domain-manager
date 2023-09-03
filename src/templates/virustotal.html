@@ -4,7 +4,7 @@
 {% block header %} Security: VirusTotal {% endblock %}
 
 {% block content %}
-    <fieldset>
+    <fieldset class="fixedwidth">
         <legend>VirusTotal Lookup</legend>
         <form method="POST">
             <input type="text" name="domain" id="domain" placeholder="example.com" value="{{ domain }}">
@@ -39,7 +39,6 @@
                         <td>{{ value.value }}</td>
                         <td>{{ value.ttl }}</td>
                         <td>{{ value.priority }}</td>
-                        <td>{{ value.rname }}</td>
                         <td><textarea>{{ value }}</textarea></td>
                     </tr>
                 {% endfor %}

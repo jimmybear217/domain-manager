@@ -59,14 +59,18 @@ def register():
 @app.route("/account/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        if passwords.verifyLogin(request.form["username"], request.form["password"]):
-            session["user"] = request.form["username"]
-            app.logger.info("User " + request.form["username"] + " logged in from ip " + request.remote_addr + ".")
-            flash("Login successful.")
-            return redirect(url_for("index"))
-        else:
+        try:
+            if passwords.verifyLogin(request.form["username"], request.form["password"]):
+                session["user"] = request.form["username"]
+                app.logger.info("User " + request.form["username"] + " logged in from ip " + request.remote_addr + ".")
+                flash("Login successful.")
+                return redirect(url_for("index"))
+            else:
+                app.logger.warning("User " + request.form["username"] + " login failed from ip " + request.remote_addr + ".")
+                flash("Incorrect password.")
+        except:
             app.logger.warning("User " + request.form["username"] + " login failed from ip " + request.remote_addr + ".")
-            flash("Incorrect password.")
+            flash("User does not exist.")
     return render_template("login.html", title='Login')
 
 @app.route("/account/logout")
