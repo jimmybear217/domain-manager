@@ -3,3 +3,4 @@ waitress
 flask
 dnspython
 blowfish
+virustotal_python

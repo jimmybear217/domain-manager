@@ -1,6 +1,6 @@
 #!/bin/bash
 cd ~/domain-manager/src
-git fetch
+git pull
 python3 -m pip install -r requirements.txt
 echo "Existing Processes: $(ps -x | grep "python3 main.py" | grep -v "grep")"
 if [ $(ps -x | grep "python3 main.py" | grep -v "grep" | awk '{print $1}' | wc -l) -gt 0 ]; then
