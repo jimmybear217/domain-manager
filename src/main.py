@@ -7,9 +7,9 @@ webserverHost = "0.0.0.0"               # host on wich to run the webserver
 mainDatabaseFile = 'domains.sqlite'     # database file to use for the webserver
 
 # install packages
-import packages as pkg
-pkg.install('whois')    # pip install whois
-pkg.install('waitress') # pip install waitress
+# import packages as pkg
+# pkg.install('whois')    # pip install whois
+# pkg.install('waitress') # pip install waitress
 
 # import packages
 import whois

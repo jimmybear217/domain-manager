@@ -2,15 +2,15 @@ import json
 import whois
 import passwords
 import encryption
-import packages as pkg
+# import packages as pkg
 import random
 import datetime
 import re
 import socket
 from database import queryDB, writeDB
-pkg.install('flask') # pip install flask
+# pkg.install('flask') # pip install flask
 from flask import Flask, render_template, redirect, url_for, request, session, flash  # import flask
-pkg.install('dnspython') # pip install dns.resolver
+# pkg.install('dnspython') # pip install dns.resolver
 import dns.resolver
 
 sqliteFileName = None
