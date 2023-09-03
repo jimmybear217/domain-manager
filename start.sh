@@ -13,4 +13,5 @@ sleep 1
 echo "Starting Process"
 python3 src/main.py &
 sleep 1
+echo "--------------------------------------------------------------------------------"
 tail -f ./main.log
