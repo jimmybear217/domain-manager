@@ -6,7 +6,7 @@ pkg.install('blowfish') # pip install blowfish
 import blowfish
 
 class Encryption:
-    keyFile = 'data/encryption.key'
+    keyFile = 'encryption.key'
     privateKey = None
     
     def __init__(self, keyFile=keyFile):

@@ -4,7 +4,7 @@ test_whoisDomain = "google.com"         # domain with wich to test whois is work
 test_whoisLocation = "US"               # expected location of test_whoisDomain
 webserverPort = 80                      # port on wich to run the webserver
 webserverHost = "0.0.0.0"               # host on wich to run the webserver
-mainDatabaseFile = 'data/domains.sqlite'     # database file to use for the webserver
+mainDatabaseFile = 'domains.sqlite'     # database file to use for the webserver
 
 # install packages
 import packages as pkg
@@ -30,21 +30,11 @@ else:
 
 # check if database and table exists and create it
 
-dbExists = os.path.isfile(mainDatabaseFile)
 
 sqliteHandle = sqlite3.connect(mainDatabaseFile)
 sqliteCursor = sqliteHandle.cursor()
-
-try:
-    sqliteTables = sqliteCursor.execute("select name from sqlite_schema where type = 'table' and name not like 'sqlite_%'")
-    if (len(sqliteTables.fetchall()) == 0):
-        dbExists = False
-    else:
-        dbExists = True
-except:
-    dbExists = False
-
-if (dbExists == False):
+sqliteTables = sqliteCursor.execute("select name from sqlite_schema where type = 'table' and name not like 'sqlite_%'")
+if (len(sqliteTables.fetchall()) == 0):
     print("Database and table not found, creating...")
     sqliteCursor.execute("create table users (user text primary key, password text, status text)")
     sqliteCursor.execute("create table domainsByUser (user text, domain text, whoisValue text, primary key (user, domain), foreign key (user) references users (user) on delete cascade on update cascade)")
