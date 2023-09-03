@@ -32,7 +32,7 @@ header nav ul li {
 
 a:visited, a:link {
     color: currentcolor;
-    text-decoration: none;
+    text-decoration: underline 1px currentColor;
 }
 
 a:hover, a:active {
