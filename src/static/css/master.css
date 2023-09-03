@@ -100,6 +100,11 @@ form.horizonal input[type=submit] {
     border-color: #009688;
 }
 
+#notification-area .notificationFlash.warning {
+    background-color: #ff9800;
+    border-color: #ff9800;
+}
+
 #notification-area .notificationFlash.error {
     background-color: #f44336;
     border-color: #d32f2f;

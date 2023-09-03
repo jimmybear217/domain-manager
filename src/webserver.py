@@ -185,28 +185,61 @@ def security_menu():
 def security_virustotal():
     if (checkLogin() == False):
         return redirect(url_for("login"))
+    
     domain = ""
     if (request.method == "POST" and request.form['domain'] != None):
         domain = request.form['domain']
+
+    # get api key from form or database
     apikey = ""
     if (request.method == "POST" and request.form['apikey'] != None):
         apikey = request.form['apikey']
-    # else:
-    #     apikey = passwords.getVTApiKey()
-    action = ""
-    if (request.method == "POST" and request.form['action'] != None):
+        if (apikey != ""):
+            flash("API key provided.", "success")
+    else:
+        # read api key from databse if it's not specificed in the form
+        apikeyEncrypted = queryDB(sqliteFileName, "select apikey from virustotalCredentials where user = ?", (session["user"],))
+        apikeyPrivateKey = queryDB(sqliteFileName, "select encryptionKey from users where user = ?", (session["user"],))
+        if (len(apikeyEncrypted) > 0):
+            apikey = secretKeyHandle.decryptWithKey(apikeyEncrypted[0][0], apikeyPrivateKey[0][0]).decode('utf-8')
+            flash("API key found.", "success")
+        else:
+            flash("API key not found.", "warning")
+        del apikeyPrivateKey, apikeyEncrypted
+
+    # save api key
+    saveApiKey = False
+    saveApiKeyChecked = ""
+    if (request.method == "POST" and "saveApiKey" in request.form and request.form['saveApiKey'] == "on"):
+        saveApiKey = True
+        saveApiKeyChecked = "checked"
+
+    if (saveApiKey == True and apikey != ""):
+        apikeyPrivateKey = queryDB(sqliteFileName, "select encryptionKey from users where user = ?", (session["user"],))
+        writeDB(sqliteFileName, "insert or replace into virustotalCredentials (user, apikey) values (?, ?)", (session["user"], secretKeyHandle.encryptWithKey(bytes(apikey, encoding='utf-8'), apikeyPrivateKey[0][0])))
+        flash("API key saved.", "success")
+        del apikeyPrivateKey
+    
+    
+    # lookup or scan action
+    action = "lookup"
+    if (request.method == "POST" and "action" in request.form and request.form['action'] != None):
         action = request.form['action']
+
+    # lookup
     vt_data = ""
     if (domain != "" and apikey != "" and action != ""):
         try:
-            with virustotal_python.Virustotal(API_KEY=apikey, API_VERSION=2) as vtotal:
+            with virustotal_python.Virustotal(API_KEY=apikey, API_VERSION=3) as vtotal:
                 resp = vtotal.request(f"domains/{domain}")
                 vt_data=resp.data
                 flash("VirusTotal Lookup successful.", "success")
         except:
             flash("VirusTotal Lookup failed. Please check your domain, API key, and action.", "error")
-            vt_data="Error"
-    return render_template("virustotal.html", domain=domain, apikey=apikey, action=action, vt_data=vt_data)
+            vt_data=json.loads("{Error: 'VirusTotal Lookup failed. Please check your domain, API key, and action.'}")
+    
+    # render
+    return render_template("virustotal.html", domain=domain, apikey=apikey, action=action, saveApiKeyChecked=saveApiKeyChecked, vt_data=vt_data)
 
 @app.route("/security/certs", methods=["GET"])
 def security_certs():

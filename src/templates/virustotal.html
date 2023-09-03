@@ -8,11 +8,12 @@
         <legend>VirusTotal Lookup</legend>
         <form method="POST">
             <input type="text" name="domain" id="domain" placeholder="example.com" value="{{ domain }}">
-            <input type="password" name="apikey" id="apikey" placeholder="API Key" value="{{ apikey }}">
-            <select name="action" id="action">
+            <input type="password" name="apikey" id="apikey" placeholder="API Key" value="{{ apikey }}" minlength="16">
+            <!-- <select name="action" id="action">
                 <option value="lookup">Lookup</option>
                 <option value="scan">scan</option>
-            </select>
+            </select> -->
+            <label for="saveApiKey">Save API Key <input type="checkbox" name="saveApiKey" id="saveApiKey" {{ saveApiKeyChecked }}></label>
             <input type="submit" value="Submit">
         </form>
     </fieldset>
@@ -20,7 +21,44 @@
         <fieldset>
             <legend>Results</legend>
             <h2>VirusTotal {{ action }} for {{ domain }}</h2>
-            <pre>{{ vtData }}</pre>
+            <textarea>{{ vt_data }}</textarea>
+            <h3>Last DNS Results</h3>
+            <table>
+                <tr>
+                    <th>DNS Records</th>
+                    <th>Result</th>
+                    <th>Time to live</th>
+                    <th>Priority</th>
+                    <th>Raw Data</th>
+                </tr>
+                {% if vt_data.attributes.last_dns_records is defined %}
+                {% for value in vt_data.attributes.last_dns_records %}
+                    <tr>
+                        <td>{{ value.type }}</td>
+                        <td>{{ value.value }}</td>
+                        <td>{{ value.ttl }}</td>
+                        <td>{{ value.priority }}</td>
+                        <td>{{ value.rname }}</td>
+                        <td><textarea>{{ value }}</textarea></td>
+                    </tr>
+                {% endfor %}
+                {% endif %}
+            </table>
+            <h3>Last AV Scan Results</h3>
+            <table>
+                <tr>
+                    <th>Antivirus</th>
+                    <th>Result</th>
+                </tr>
+                {% if vt_data.attributes.last_analysis_results is defined %}
+                {% for key, value in vt_data.attributes.last_analysis_results.items() %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% endfor %}
+                {% endif %}
+            </table>
         </fieldset>
     {% endif %}
 {% endblock %}
