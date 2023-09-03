@@ -11,7 +11,6 @@ if [ $(ps -x | grep "python3 main.py" | grep -v "grep" | awk '{print $1}' | wc -
 fi
 sleep 1
 echo "Starting Process"
-python3 src/main.py &> ./stdout 2> ./stderr &
-cat ./stderr
-cat ./stdout
+python3 src/main.py &
+sleep 1
 tail -f ./main.log
