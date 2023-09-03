@@ -2,14 +2,9 @@
 ## test whois to ensure proper installation and configuration
 test_whoisDomain = "google.com"         # domain with wich to test whois is working
 test_whoisLocation = "US"               # expected location of test_whoisDomain
-webserverPort = 80                      # port on wich to run the webserver
+webserverPort = 8080                    # port on wich to run the webserver
 webserverHost = "0.0.0.0"               # host on wich to run the webserver
 mainDatabaseFile = 'domains.sqlite'     # database file to use for the webserver
-
-# install packages
-# import packages as pkg
-# pkg.install('whois')    # pip install whois
-# pkg.install('waitress') # pip install waitress
 
 # import packages
 import whois

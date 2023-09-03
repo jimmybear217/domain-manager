@@ -1,8 +1,5 @@
 import random
 import os
-
-# import packages as pkg
-# pkg.install('blowfish') # pip install blowfish
 import blowfish
 
 class Encryption:
