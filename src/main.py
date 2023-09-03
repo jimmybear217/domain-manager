@@ -59,6 +59,10 @@ if (len(sqliteCursor.execute("select name from sqlite_schema where type = 'table
     sqliteHandle.commit()
 sqliteHandle.close()
 
+
+### add httpHostRoot and httpHostWww to databse according to whois function
+
+
 # run webserver
 print("Starting webserver on " + webserverHost + ":" + str(webserverPort) + "...")
 webserver.passSqliteFileName(mainDatabaseFile)

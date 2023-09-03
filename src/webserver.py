@@ -104,6 +104,7 @@ def whois_list():
                 flash("Write failed for domain " + domain + ". See logs for more details.")
         else:
             flash("Domain already exists: " + domain)
+        ## lookup host IPs
     return render_template("whois_list.html", domains=queryDB(sqliteFileName, "select domain, whoisValue from domainsByUser where user = ?", (session["user"],)))
 
 @app.route("/whois/lookup", methods=["GET"])

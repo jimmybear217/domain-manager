@@ -18,6 +18,7 @@
                 <th>Registrar</th>
                 <th>Dates</th>
                 <th>DNS Servers</th>
+                <th>HTTP Servers</th>
                 <th>JSON Data</th>
                 <th>Refresh</th>
                 <th>Delete</th>
@@ -34,8 +35,12 @@
             </ul></td>
             <td class="domain-list-dns"><ul>
                 {% for server in whoisValueParsed.name_servers %}
-                    <li>{{ server }}</li><br>
+                    <li>{{ server }}</li>
                 {% endfor %}
+            </ul></td>
+            <td class="domain-list-http"><ul>
+                <li>root: {{ httpHostRoot }}</li>
+                <li>www: {{ httpHostWww }}</li>
             </ul></td>
             <td class="domain-list-json"><textarea readonly>{{ whoisValue }}</textarea></td>
             <td class="domain-list-actions"><a href="{{ url_for('whois_refresh') }}?domain={{ lookedUpDomain }}">Refresh</a></td>
