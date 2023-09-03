@@ -112,12 +112,16 @@ def whois_list():
         domain = request.args.get('domain')
         if (queryDB(sqliteFileName, "SELECT count(domain) from domainsByUser WHERE domain = ? AND user = ?", (domain, session["user"]))[0][0] == 0):
             whoisData = whois.whois(domain)
+            app.logger.debug("Gathered " + str(len(whoisData)) + " characters of whois data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
             try:
                 writeDB(sqliteFileName, "insert into domainsByUser (user, domain, whoisValue) values (?, ?, ?)", (session["user"], domain, str(whoisData)))
+                app.logger.debug("Domain " + domain + " added for user " + session["user"] + ".")
                 flash("Domain Added: " + domain)
             except:
+                app.logger.error("Write failed for domain " + domain + ".")
                 flash("Write failed for domain " + domain + ". See logs for more details.")
         else:
+            app.logger.debug("Domain " + domain + " already exists for user " + session["user"] + ".")
             flash("Domain already exists: " + domain)
         ## lookup host IPs
     return render_template("whois_list.html", domains=queryDB(sqliteFileName, "select domain, whoisValue from domainsByUser where user = ?", (session["user"],)))
@@ -136,6 +140,7 @@ def whois_start():
         whoisData = "Please enter a domain."
     else:
         whoisData = whois.whois(domain)
+        app.logger.debug("Gathered " + str(len(whoisData)) + " characters of whois data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
     return render_template("whois.html", domain=domain, whoisData=str(whoisData))
 
 @app.route("/whois/refresh", methods=["GET"])
@@ -148,7 +153,9 @@ def whois_refresh():
     if request.args.get('domain') != None:
         domain = request.args.get('domain')
         whoisData = whois.whois(domain)
+        app.logger.debug("Gathered " + str(len(whoisData)) + " characters of whois data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
         writeDB(sqliteFileName, "update domainsByUser set whoisValue = ? where domain = ?", (str(whoisData), domain))
+        app.logger.debug("Domain " + domain + " refreshed for all users.")
         flash("Domain Refreshed: " + domain)
     return redirect(url_for("whois_list"))
 
@@ -162,6 +169,7 @@ def whois_delete():
     if request.args.get('domain') != None:
         domain = request.args.get('domain')
         writeDB(sqliteFileName, "delete from domainsByUser where domain = ? and user = ?", (domain, session["user"]))
+        app.info("Domain " + domain + " deleted for user " + session["user"] + " from IP " + request.remote_addr + ".")
         flash("Domain Deleted: " + domain)
     return redirect(url_for("whois_list"))
 
@@ -189,10 +197,13 @@ def dns_lookup():
             else:
                 resolver.nameservers = [socket.gethostbyname(request.args.get('nameServer'))]
         try:
+            app.logger.debug("Querying DNS server " + resolver.nameservers[0] + " for domain " + domain + " with type " + recordType + " as user " + session.get("user", "anonymous") + ".")
             dnsData = resolver.query(domain, recordType).response.to_text()
+            app.logger.debug("Gathered " + str(len(dnsData)) + " characters of DNS data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
             flash("DNS Lookup successful.", "success")
         except:
             dnsData = ""
+            app.logger.error("DNS Lookup failed for domain " + domain + " with type " + recordType + " as user " + session.get("user", "anonymous") + ".")
             flash("DNS Lookup failed. Please check your domain, record type, and name server.", "error")
         return render_template("dns.html", domain=domain, recordType=recordType, nameServer=resolver.nameservers[0], dnsData=dnsData)
     else:
@@ -234,8 +245,10 @@ def security_virustotal():
         apikeyPrivateKey = queryDB(sqliteFileName, "select encryptionKey from users where user = ?", (session["user"],))
         if (len(apikeyEncrypted) > 0):
             apikey = secretKeyHandle.decryptWithKey(apikeyEncrypted[0][0], apikeyPrivateKey[0][0]).decode('utf-8')
+            app.logger.debug("VirusTotal API key found for user " + session["user"] + ".")
             flash("API key found.", "success")
         else:
+            app.logger.info("VirusTotal API key not found for user " + session["user"] + ".")
             flash("API key not found.", "warning")
         del apikeyPrivateKey, apikeyEncrypted
 
@@ -249,6 +262,7 @@ def security_virustotal():
     if (saveApiKey == True and apikey != ""):
         apikeyPrivateKey = queryDB(sqliteFileName, "select encryptionKey from users where user = ?", (session["user"],))
         writeDB(sqliteFileName, "insert or replace into virustotalCredentials (user, apikey) values (?, ?)", (session["user"], secretKeyHandle.encryptWithKey(bytes(apikey, encoding='utf-8'), apikeyPrivateKey[0][0])))
+        app.logger.debug("VirusTotal API key saved for user " + session["user"] + ".")
         flash("API key saved.", "success")
         del apikeyPrivateKey
     
@@ -261,12 +275,15 @@ def security_virustotal():
     # lookup
     vt_data = ""
     if (domain != "" and apikey != "" and action != ""):
+        app.logger.debug("VirusTotal " + action + " requested for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
         try:
             with virustotal_python.Virustotal(API_KEY=apikey, API_VERSION=3) as vtotal:
                 resp = vtotal.request(f"domains/{domain}")
                 vt_data=resp.data
+                app.logger.debug("Gathered " + str(len(vt_data)) + " characters of VirusTotal data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
                 flash("VirusTotal Lookup successful.", "success")
         except:
+            app.logger.error("VirusTotal Lookup failed for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
             flash("VirusTotal Lookup failed. Please check your domain, API key, and action.", "error")
             vt_data=json.loads("{Error: 'VirusTotal Lookup failed. Please check your domain, API key, and action.'}")
     
