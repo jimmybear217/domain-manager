@@ -374,5 +374,22 @@ def security_urlscan():
     if (checkLogin() == False):
         app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
+    
+    # gather domain input
+    domain = ""
+    if ("domain" in request.args and request.args.get('domain') != None):
+        domain = request.args.get('domain')
+        # gather cert data
+        urlscanData = ""
+        try:
+            urlscanData = requests.get("https://urlscan.io/api/v1/search/?q=domain:" + domain).json()
+            app.logger.debug("Gathered " + str(len(urlscanData)) + " fields of urlscan data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
+            flash("urlscan Lookup successful.", "success")
+        except Exception as e:
+            app.logger.error("urlscan Lookup failed for domain " + domain + " as user " + session.get("user", "anonymous") + ": " + str(e) + ".")
+            flash("urlscan Lookup failed. Please check your domain.", "error")
+            urlscanData = ""
 
-    return render_template("urlscan.html")
+        return render_template("urlscan.html", domain=domain, urlscanData=urlscanData)
+
+    return render_template("urlscan.html", domain=domain)

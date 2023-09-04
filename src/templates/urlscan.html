@@ -1,8 +1,75 @@
 {% extends 'base.html' %}
 
-{% block title %} Certificates {% endblock %}
-{% block header %} Security: Certificates {% endblock %}
+{% block title %} URL Scan {% endblock %}
+{% block header %} Security: URLScan.IO {% endblock %}
 
 {% block content %}
-    <p>please select an option from the menu</p>
+<fieldset class="fixedwidth">
+    <legend>URLScan.IO Lookup</legend>
+    <form method="GET">
+        <input type="text" name="domain" id="domain" placeholder="example.com" value="{{ domain }}">
+        <input type="submit" value="Submit">
+    </form>
+</fieldset>
+
+{% if domain != "" %}
+<fieldset>
+    <legend>Results</legend>
+    <h2>URLScan lookup for {{ domain }}</h2>
+    <textarea>{{ urlscanData }}</textarea>
+    {% if urlscanData is defined %}
+    {% if urlscanData.total > 0 %}
+    <p>found {{ urlscanData.total }} results</p>
+    <table>
+        <tr>
+            {% for field in urlscanData.results[0] %}
+            <th>{{ field }}</th>
+            {% endfor %}
+            <th>Raw Data</th>
+        </tr>
+        {% if urlscanData is defined %}
+        {% for value in urlscanData.results %}
+            <tr>
+                {% for field in value %}
+                <td>
+                    {% set fieldIsFound = False %}
+                    {% if field in ["task", "stats", "page", "sort"] %}
+                        {% set fieldIsFound = True %}
+                        <ul>
+                            {% for subfield in value[field] %}
+                                <li>{{ subfield }}: {{ value[field][subfield] }} </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% if field in ["_id", "_score"] %}
+                        {% set fieldIsFound = True %}
+                        <pre>{{ value[field] }}</pre>
+                    {% endif %}
+                    {% if field in ["result"] %}
+                        {% set fieldIsFound = True %}
+                        <a href="{{ value[field] }}" target="_blank">Open Results</a>
+                    {% endif %}
+                    {% if field in ["screenshot"] %}
+                        {% set fieldIsFound = True %}
+                        <img src="{{ value[field] }}" width="160px" height="120px" alt="Screenshot">
+                    {% endif %}
+                    {% if fieldIsFound == False %}
+                        <textarea>{{ value[field] }}</textarea>
+                    {% endif %}
+                </td>
+                {% endfor %}
+                <td><textarea>{{ value }}</textarea></td>
+            </tr>
+        {% endfor %}
+        {% endif %}
+    </table>
+    {% else %}
+    <p>No results found</p>
+    {% endif %}
+    {% endif %}
+
+
+</fieldset>
+{% endif %}
+
 {% endblock %}
