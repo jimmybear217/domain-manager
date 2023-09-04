@@ -39,8 +39,10 @@
                 {% endfor %}
             </ul></td>
             <td class="domain-list-http"><ul>
+                {% if rootIPs and rootASN and wwwIPs and wwwASN %}
                 <li>root: {{ rootIPs }}<br><pre>{{ rootASN.replace(",", ",\n") }}</pre></li>
                 <li>www: {{ wwwIPs }}<br><pre>{{ wwwASN.replace(",", ",\n") }}</pre></li>
+                {% endif %}
             </ul></td>
             <td class="domain-list-json"><textarea readonly>{{ whoisValue }}</textarea></td>
             <td class="domain-list-actions"><a href="javascript:refreshDomain('{{ lookedUpDomain }}')">Refresh</a></td>
