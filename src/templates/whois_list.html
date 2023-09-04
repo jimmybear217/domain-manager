@@ -20,8 +20,7 @@
                 <th>DNS Servers</th>
                 <th>HTTP Servers</th>
                 <th>JSON Data</th>
-                <th>Refresh</th>
-                <th>Delete</th>
+                <th>Actions</th>
             </tr>
         {% for lookedUpDomain, whoisValue, rootIPs, wwwIPs, rootASN, wwwASN in domains %}
             {% set whoisValueParsed = whoisValue|fromJson %}
@@ -45,8 +44,8 @@
                 {% endif %}
             </ul></td>
             <td class="domain-list-json"><textarea readonly>{{ whoisValue }}</textarea></td>
-            <td class="domain-list-actions"><a href="javascript:refreshDomain('{{ lookedUpDomain }}')">Refresh</a></td>
-            <td class="domain-list-actions"><a href="javascript:refreshDomain('{{ lookedUpDomain }}')">Delete</a></td>
+            <td class="domain-list-actions"><a href="javascript:refreshDomain('{{ lookedUpDomain }}')">Refresh</a><br>
+                <a href="javascript:refreshDomain('{{ lookedUpDomain }}')">Delete</a></td>
         </tr>
         {% endfor %}
         </table>
