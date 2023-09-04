@@ -181,7 +181,7 @@ def whois_refresh():
             pass
 
         app.logger.debug("Gathered IPs for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
-        print("Api Key: " + config.get("ipDataApiKey"))
+        # print("Api Key: " + config.get("ipDataApiKey"))
         # print(str(domain), str(rootIPs), str(wwwIPs), str(rootASN), str(wwwASN))
         
         writeDB(sqliteFileName, "update domainsByUser set whoisValue = ?, rootIPs = ?, wwwIPs = ?, rootASN = ?, wwwASN = ? where domain = ?", (str(whoisData), str(rootIPs), str(wwwIPs), str(rootASN), str(wwwASN), str(domain)))

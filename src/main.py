@@ -14,7 +14,7 @@ webserverHost = config.get("webserverHost")
 mainDatabaseFile = config.get("mainDatabaseFile")
 
 import logging
-logging.basicConfig(filename=config.get("mainLogFile"), level=config.get("mainLogLevel"), style='{', format='{asctime} [{levelname}] {message}', datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(filename=config.get("mainLogFile"), level=logging.DEBUG, style='{', format='{asctime} [{levelname}] {message}', datefmt='%Y-%m-%d %H:%M:%S')
 
 logging.info("Starting...")
 

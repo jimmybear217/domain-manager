@@ -10,7 +10,6 @@ default_config = {
     "webserverHost": "0.0.0.0",
     "mainDatabaseFile": 'main.sqlite',
     "mainLogFile": 'main.log',
-    "mainLogLevel": logging.INFO,
     "developmentmode": False,
     "ipDataApiKey": "",
 }
