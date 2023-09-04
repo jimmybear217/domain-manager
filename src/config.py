@@ -11,7 +11,8 @@ default_config = {
     "mainDatabaseFile": 'main.sqlite',
     "mainLogFile": 'main.log',
     "mainLogLevel": logging.DEBUG,
-    "developmentmode": False
+    "developmentmode": False,
+    "ipDataApiKey": "",
 }
 
 current_config = default_config

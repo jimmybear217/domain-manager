@@ -1,17 +1,18 @@
-import json
-import whois
-import passwords
-import encryption
-import random
-import datetime
-import re
-import socket
-import virustotal_python
 from database import queryDB, writeDB
 from flask import Flask, render_template, redirect, url_for, request, session, flash
-import dns.resolver
-import logging
 import config
+import datetime
+import dns.resolver
+import encryption
+import json
+import logging
+import passwords
+import random
+import re
+import requests
+import socket
+import virustotal_python
+import whois
 
 ## logging
 logging.basicConfig(filename=config.get("mainLogFile"), level=config.get("mainLogLevel"))
@@ -89,7 +90,7 @@ def checkLogin():
 ## template processors
 @app.template_filter('fromJson')
 def parseJson(jsonStr):
-    return json.loads(jsonStr.replace("'", "\""))
+    return json.loads(str(jsonStr).replace("'", "\""))
 
 @app.template_filter('toLocateDateTime')
 def toLocateDateTime(timestamp):
@@ -115,12 +116,11 @@ def whois_list():
     if request.args.get('domain') != None:
         domain = request.args.get('domain')
         if (queryDB(sqliteFileName, "SELECT count(domain) from domainsByUser WHERE domain = ? AND user = ?", (domain, session["user"]))[0][0] == 0):
-            whoisData = whois.whois(domain)
-            app.logger.debug("Gathered " + str(len(whoisData)) + " characters of whois data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
             try:
-                writeDB(sqliteFileName, "insert into domainsByUser (user, domain, whoisValue) values (?, ?, ?)", (session["user"], domain, str(whoisData)))
+                writeDB(sqliteFileName, "insert into domainsByUser (user, domain) values (?, ?)", (session["user"], domain))
                 app.logger.debug("Domain " + domain + " added for user " + session["user"] + ".")
                 flash("Domain Added: " + domain)
+                return redirect(url_for("whois_refresh", domain=domain))
             except:
                 app.logger.error("Write failed for domain " + domain + ".")
                 flash("Write failed for domain " + domain + ". See logs for more details.")
@@ -128,7 +128,7 @@ def whois_list():
             app.logger.debug("Domain " + domain + " already exists for user " + session["user"] + ".")
             flash("Domain already exists: " + domain)
         ## lookup host IPs
-    return render_template("whois_list.html", domains=queryDB(sqliteFileName, "select domain, whoisValue from domainsByUser where user = ?", (session["user"],)))
+    return render_template("whois_list.html", domains=queryDB(sqliteFileName, "select domain, whoisValue, rootIPs, wwwIPs, rootASN, wwwASN from domainsByUser where user = ?", (session["user"],)))
 
 @app.route("/whois/lookup", methods=["GET"])
 def whois_start():
@@ -156,9 +156,35 @@ def whois_refresh():
     
     if request.args.get('domain') != None:
         domain = request.args.get('domain')
+
+        ## lookup whois data
         whoisData = whois.whois(domain)
         app.logger.debug("Gathered " + str(len(whoisData)) + " characters of whois data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
-        writeDB(sqliteFileName, "update domainsByUser set whoisValue = ? where domain = ?", (str(whoisData), domain))
+
+        ## resolve root and www IPs with ASNs for domain
+        rootIPs = ""
+        wwwIPs = ""
+        rootASN = ""
+        wwwASN = ""
+        try:
+            resolvedIps = socket.gethostbyname(domain)
+            rootIPs = resolvedIps
+            rootASN = requests.get("https://api.ipdata.co/" + rootIPs + "/asn?api-key=" + config.get("ipDataApiKey")).json()
+
+        except:
+            pass
+        try:
+            resolvedIps = socket.gethostbyname("www." + domain)
+            wwwIPs = resolvedIps
+            wwwASN = requests.get("https://api.ipdata.co/" + wwwIPs + "/asn?api-key=" + config.get("ipDataApiKey")).json()
+        except:
+            pass
+
+        app.logger.debug("Gathered IPs for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
+        print("Api Key: " + config.get("ipDataApiKey"))
+        # print(str(domain), str(rootIPs), str(wwwIPs), str(rootASN), str(wwwASN))
+        
+        writeDB(sqliteFileName, "update domainsByUser set whoisValue = ?, rootIPs = ?, wwwIPs = ?, rootASN = ?, wwwASN = ? where domain = ?", (str(whoisData), str(rootIPs), str(wwwIPs), str(rootASN), str(wwwASN), str(domain)))
         app.logger.debug("Domain " + domain + " refreshed for all users.")
         flash("Domain Refreshed: " + domain)
     return redirect(url_for("whois_list"))

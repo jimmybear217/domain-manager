@@ -23,7 +23,7 @@
                 <th>Refresh</th>
                 <th>Delete</th>
             </tr>
-        {% for lookedUpDomain, whoisValue in domains %}
+        {% for lookedUpDomain, whoisValue, rootIPs, wwwIPs, rootASN, wwwASN in domains %}
             {% set whoisValueParsed = whoisValue|fromJson %}
         <tr>
             <td class="domain-list-name">{{ lookedUpDomain }}</td>
@@ -39,15 +39,25 @@
                 {% endfor %}
             </ul></td>
             <td class="domain-list-http"><ul>
-                <li>root: {{ httpHostRoot }}</li>
-                <li>www: {{ httpHostWww }}</li>
+                <li>root: {{ rootIPs }}<br><pre>{{ rootASN.replace(",", ",\n") }}</pre></li>
+                <li>www: {{ wwwIPs }}<br><pre>{{ wwwASN.replace(",", ",\n") }}</pre></li>
             </ul></td>
             <td class="domain-list-json"><textarea readonly>{{ whoisValue }}</textarea></td>
-            <td class="domain-list-actions"><a href="{{ url_for('whois_refresh') }}?domain={{ lookedUpDomain }}">Refresh</a></td>
-            <td class="domain-list-actions"><a href="{{ url_for('whois_delete') }}?domain={{ lookedUpDomain }}">Delete</a></td>
+            <td class="domain-list-actions"><a href="javascript:refreshDomain('{{ lookedUpDomain }}')">Refresh</a></td>
+            <td class="domain-list-actions"><a href="javascript:refreshDomain('{{ lookedUpDomain }}')">Delete</a></td>
         </tr>
         {% endfor %}
         </table>
     {% endif %}
+
+    <script type="text/javascript">
+        function refreshDomain(domain) {
+            console.log("Refreshing " + domain)
+            showNotification("Refreshing data...");
+            setTimeout(function() {
+                window.location.href = "{{ url_for('whois_refresh') }}?domain=" + domain;
+            }, 1000);
+        }
+    </script>
 
 {% endblock %}

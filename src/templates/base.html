@@ -37,7 +37,7 @@
     <div id="notification-area"></div>
     <script type="text/javascript">
         var notificationCount = 0
-        function showNotification(category, message) {
+        function showNotification(message, category="notification") {
             var notif = document.createElement("div")
             notif.className = "notificationFlash"
             notif.innerText = message
@@ -62,7 +62,7 @@
         {% if messages %}
             <script>
             {% for category, message in messages %}
-            showNotification("{{ category }}", "{{ message }}")
+            showNotification("{{ message }}", "{{ category }}")
             {% endfor %}
             </script>
         {% endif %}
