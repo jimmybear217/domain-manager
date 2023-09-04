@@ -350,7 +350,7 @@ def security_certs():
             tempFile.close()
             certData = ssl._ssl._test_decode_cert(tempFileName)
             os.remove(tempFileName)
-            app.logger.debug("Gathered and Decoded " + str(len(certData)) + " characters of cert data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
+            app.logger.debug("Gathered and Decoded " + str(len(certData)) + " datapoints of cert data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
             flash("Cert Lookup successful.", "success")
 
             # get crt.sh data
