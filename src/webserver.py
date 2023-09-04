@@ -1,3 +1,5 @@
+import os
+import ssl
 from database import queryDB, writeDB
 from flask import Flask, render_template, redirect, url_for, request, session, flash
 import config
@@ -13,17 +15,19 @@ import requests
 import socket
 import virustotal_python
 import whois
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
 
-## logging
+# logging
 logging.basicConfig(filename=config.get("mainLogFile"), level=config.get("mainLogLevel"))
 
-## database
+# database
 sqliteFileName = config.get("mainDatabaseFile")
 
-## webserver
+# webserver
 app = Flask(__name__)
 
-## set secret key for session - generate it randomly if it does not exist and encrypt it into a file
+# set secret key for session - generate it randomly if it does not exist and encrypt it into a file
 secretKeyHandle = encryption.Encryption()
 secretKey = secretKeyHandle.decryptFile("flask.key")
 if (secretKey == None):
@@ -33,7 +37,7 @@ if (secretKey == None):
 app.secret_key = secretKey
 
 
-## main page
+# main page
 @app.route("/")
 def index():
     app.logger.debug("Index page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
@@ -43,7 +47,7 @@ def index():
     return render_template("index.html", title='Home')
 
 
-## account management
+# account management / register action
 @app.route("/account/register", methods=["POST"])
 def register():
     if request.method == "POST":
@@ -56,7 +60,7 @@ def register():
             flash("User already exists.")
     return render_template("register.html", title='Register')
 
-
+# account management / login action
 @app.route("/account/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -105,7 +109,7 @@ def toLocateDateTime(timestamp):
     return datetime.datetime.fromisoformat(timestamp).astimezone().strftime("%m/%d/%Y")
 
 
-## whois
+# whois list ("My Domains" page)
 @app.route("/whois/list", methods=["GET"])
 def whois_list():
     app.logger.debug("Whois List page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
@@ -130,6 +134,7 @@ def whois_list():
         ## lookup host IPs
     return render_template("whois_list.html", domains=queryDB(sqliteFileName, "select domain, whoisValue, rootIPs, wwwIPs, rootASN, wwwASN from domainsByUser where user = ?", (session["user"],)))
 
+# whois lookup page
 @app.route("/whois/lookup", methods=["GET"])
 def whois_start():
     app.logger.debug("Whois Query page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
@@ -147,6 +152,7 @@ def whois_start():
         app.logger.debug("Gathered " + str(len(whoisData)) + " characters of whois data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
     return render_template("whois.html", domain=domain, whoisData=str(whoisData))
 
+# whois refresh action
 @app.route("/whois/refresh", methods=["GET"])
 def whois_refresh():
     app.logger.debug("Whois Refresh page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
@@ -181,14 +187,13 @@ def whois_refresh():
             pass
 
         app.logger.debug("Gathered IPs for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
-        # print("Api Key: " + config.get("ipDataApiKey"))
-        # print(str(domain), str(rootIPs), str(wwwIPs), str(rootASN), str(wwwASN))
         
         writeDB(sqliteFileName, "update domainsByUser set whoisValue = ?, rootIPs = ?, wwwIPs = ?, rootASN = ?, wwwASN = ? where domain = ?", (str(whoisData), str(rootIPs), str(wwwIPs), str(rootASN), str(wwwASN), str(domain)))
         app.logger.debug("Domain " + domain + " refreshed for all users.")
         flash("Domain Refreshed: " + domain)
     return redirect(url_for("whois_list"))
 
+# whois delete action
 @app.route("/whois/delete", methods=["GET"])
 def whois_delete():
     app.logger.debug("Whois delete page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
@@ -203,11 +208,13 @@ def whois_delete():
         flash("Domain Deleted: " + domain)
     return redirect(url_for("whois_list"))
 
-## DNS lookup
+# DNS lookup
+## check if string is an IP address
 def is_ip_address(ip_address):
   regex = re.compile(r'^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$')
   return regex.match(ip_address) is not None
 
+# dns lookup page
 @app.route("/dns/lookup", methods=["GET"])
 def dns_lookup():
     app.logger.debug("DNS Lookup page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
@@ -241,8 +248,7 @@ def dns_lookup():
         dnsData = "Please enter a domain."
         return render_template("dns.html", domain=domain, dnsData=dnsData)
 
-## security menus
-
+# security menu
 @app.route("/security", methods=["GET"])
 def security_menu():
     app.logger.debug("Security menu page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
@@ -252,6 +258,7 @@ def security_menu():
     
     return render_template("security.html")
 
+# security / virustotal page
 @app.route("/security/virustotal", methods=["GET", "POST"])
 def security_virustotal():
     app.logger.debug("VirusTotal page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
@@ -320,6 +327,7 @@ def security_virustotal():
     # render
     return render_template("virustotal.html", domain=domain, apikey=apikey, action=action, saveApiKeyChecked=saveApiKeyChecked, vt_data=vt_data)
 
+# security / certs page
 @app.route("/security/certs", methods=["GET"])
 def security_certs():
     app.logger.debug("certs page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
@@ -327,8 +335,39 @@ def security_certs():
         app.logger.warning("User not logged in, redirecting to login page.")
         return redirect(url_for("login"))
 
-    return render_template("certs.html")
+    # gather domain input
+    domain = ""
+    if ("domain" in request.args and request.args.get('domain') != None):
+        domain = request.args.get('domain')
+        # gather cert data
+        certData = ""
+        try:
+            # get current ceritificate data
+            # certData = x509.load_pem_x509_certificate(ssl.get_server_certificate((domain, 443)), default_backend()).public_bytes(cryptography.hazmat.primitives.serialization.Encoding.PEM).decode('utf-8')
+            tempFileName = "temp-" + str(random.randint(100, 999)) + ".pem"
+            tempFile=open(tempFileName, "w")
+            tempFile.write(ssl.get_server_certificate((domain, 443)))
+            tempFile.close()
+            certData = ssl._ssl._test_decode_cert(tempFileName)
+            os.remove(tempFileName)
+            app.logger.debug("Gathered and Decoded " + str(len(certData)) + " characters of cert data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
+            flash("Cert Lookup successful.", "success")
 
+            # get crt.sh data
+            crtshData = requests.get("https://crt.sh/?q=%." + domain + "&output=json").json()
+            app.logger.debug("Gathered " + str(len(crtshData)) + " characters of crt.sh data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
+            flash("crt.sh Lookup successful.", "success")
+        except Exception as e:
+            app.logger.error("Cert Lookup failed for domain " + domain + " as user " + session.get("user", "anonymous") + ": " + str(e) + ".")
+            flash("Certificate Lookup failed. Please check your domain.", "error")
+            certData = ""
+            crtshData = ""
+
+        return render_template("certs.html", domain=domain, certData=certData, crtshData=crtshData)
+    else:
+        return render_template("certs.html", domain=domain)
+
+# security / urlscan page
 @app.route("/security/urlscan", methods=["GET"])
 def security_urlscan():
     app.logger.debug("urlscan page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))

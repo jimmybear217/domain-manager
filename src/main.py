@@ -1,5 +1,5 @@
-# global vars
-## test whois to ensure proper installation and configuration
+# load configuration
+
 import config
 if (config.doesConfigExist() == False):
     print("Config file not found, creating...")
@@ -7,15 +7,16 @@ if (config.doesConfigExist() == False):
     print("Config file created, please edit it and run the program again.")
 config.loadConfig()
 
+# set variables
 test_whoisDomain = config.get("test_whoisDomain")
 test_whoisLocation = config.get("test_whoisLocation")
 webserverPort = config.get("webserverPort")
 webserverHost = config.get("webserverHost")
 mainDatabaseFile = config.get("mainDatabaseFile")
 
+# setup logging
 import logging
 logging.basicConfig(filename=config.get("mainLogFile"), level=logging.DEBUG, style='{', format='{asctime} [{levelname}] {message}', datefmt='%Y-%m-%d %H:%M:%S')
-
 logging.info("Starting...")
 
 # import packages
@@ -23,10 +24,10 @@ import whois
 from waitress import serve
 import sqlite3
 import os
-import encryption
 
 #import custom packages
 import webserver as webserver
+import encryption
 
 # tests
 logging.debug("Testing whois...")

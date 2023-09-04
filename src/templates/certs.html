@@ -4,5 +4,64 @@
 {% block header %} Security: Certificates {% endblock %}
 
 {% block content %}
-    <p>please select an option from the menu</p>
+<fieldset class="fixedwidth">
+    <legend>SSL Certificates Lookup</legend>
+    <form method="GET">
+        <input type="text" name="domain" id="domain" placeholder="example.com" value="{{ domain }}">
+        <input type="submit" value="Submit">
+    </form>
+</fieldset>
+{% if domain != "" %}
+        <fieldset>
+            <legend>Results</legend>
+            <h2>SSL Certificate lookup for {{ domain }}</h2>
+            <textarea>{{ certData }}</textarea>
+            <textarea>{{ crtshData }}</textarea>
+            <h3>Current SSL Certificate</h3>
+            <table>
+                <tr>
+                    <th>Subject</th>
+                    <th>subjectAltName</th>
+                    <th>Issuer</th>
+                    <th>Not Before</th>
+                    <th>Not After</th>
+                </tr>
+                {% if certData is defined %}
+                    <tr>
+                        <td>{{ certData.subject }}</td>
+                        <td>{{ certData.subjectAltName }}</td>
+                        <td>{{ certData.issuer }}</td>
+                        <td>{{ certData.notBefore }}</td>
+                        <td>{{ certData.notAfter }}</td>
+                    </tr>
+                {% endif %}
+            </table>
+
+            <h3>All Registered Certificates for the domain</h3>
+            <table>
+                <tr>
+                    <th>Common name</th>
+                    <th>Name value</th>
+                    <th>Issuer name</th>
+                    <th>Not Before</th>
+                    <th>Not After</th>
+                    <th>Raw Data</th>
+                </tr>
+                {% if crtshData is defined %}
+                {% for value in crtshData %}
+                    <tr>
+                        <td>{{ value.common_name }}</td>
+                        <td>{{ value.name_value }}</td>
+                        <td>{{ value.issuer_name }}</td>
+                        <td>{{ value.not_before }}</td>
+                        <td>{{ value.not_after }}</td>
+                        <td><textarea>{{ value }}</textarea></td>
+                    </tr>
+                {% endfor %}
+                {% endif %}
+            </table>
+
+
+        </fieldset>
+    {% endif %}
 {% endblock %}
