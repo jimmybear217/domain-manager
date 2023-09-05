@@ -371,6 +371,33 @@ def security_certs():
     else:
         return render_template("certs.html", domain=domain)
 
+# security / Shodan InternetDB page
+@app.route("/security/Shodan InternetDB", methods=["GET"])
+def security_shodan_internetdb():
+    app.logger.debug("Shodan InternetDB page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
+    if (checkLogin() == False):
+        app.logger.warning("User not logged in, redirecting to login page.")
+        return redirect(url_for("login"))
+    
+    # gather ip input
+    ip = ""
+    if ("ip" in request.args and request.args.get('ip') != None):
+        ip = request.args.get('ip')
+        # gather cert data
+        shodanData = ""
+        try:
+            shodanData = requests.get("https://internetdb.shodan.io/" + ip).json()
+            app.logger.debug("Gathered " + str(len(shodanData)) + " fields of shodan data for ip " + ip + " as user " + session.get("user", "anonymous") + ".")
+            flash("Shodan Lookup successful.", "success")
+        except Exception as e:
+            app.logger.error("shodan Lookup failed for domain " + ip + " as user " + session.get("user", "anonymous") + ": " + str(e) + ".")
+            flash("Shodan Lookup failed. Please check your domain.", "error")
+            shodanData = ""
+
+        return render_template("shodan_internetdb.html", ip=ip, shodanData=shodanData)
+
+    return render_template("shodan_internetdb.html", ip=ip)
+
 # security / urlscan page
 @app.route("/security/urlscan", methods=["GET"])
 def security_urlscan():
@@ -388,10 +415,10 @@ def security_urlscan():
         try:
             urlscanData = requests.get("https://urlscan.io/api/v1/search/?q=domain:" + domain).json()
             app.logger.debug("Gathered " + str(len(urlscanData)) + " fields of urlscan data for domain " + domain + " as user " + session.get("user", "anonymous") + ".")
-            flash("urlscan Lookup successful.", "success")
+            flash("UrlScan Lookup successful.", "success")
         except Exception as e:
             app.logger.error("urlscan Lookup failed for domain " + domain + " as user " + session.get("user", "anonymous") + ": " + str(e) + ".")
-            flash("urlscan Lookup failed. Please check your domain.", "error")
+            flash("UrlScan Lookup failed. Please check your domain.", "error")
             urlscanData = ""
 
         return render_template("urlscan.html", domain=domain, urlscanData=urlscanData)

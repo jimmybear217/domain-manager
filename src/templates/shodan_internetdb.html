@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %} Shodan Internet DB {% endblock %}
+{% block header %} Security / Shodan Internet Database {% endblock %}
+
+{% block content %}
+    <form method="GET">
+        <fieldset class="fixedwidth">
+            <label for="ip">ip</label>
+            <input type="text" name="ip" placeholder="1.1.1.1" value="{{ ip }}">
+            <input type="submit" value="Submit">
+        </fieldset>
+    </form>
+    {% if ip != "" %}
+        <h2>Shodan Query for {{ ip }}</h2>
+        <pre class="fixedwidth">{{ shodanData }}</pre>
+    {% endif %}
+{% endblock %}
