@@ -24,6 +24,7 @@ import whois
 from waitress import serve
 import sqlite3
 import os
+import atexit
 
 #import custom packages
 import webserver as webserver
@@ -108,6 +109,9 @@ print("Starting webserver on interface " + webserverHost + " and port " + str(we
 logging.info("Starting webserver on interface " + webserverHost + " and port " + str(webserverPort) + "...")
 # webserver.app.run(host=webserverHost, port=webserverPort, debug=True)
 serve(webserver.app, host=webserverHost, port=webserverPort)
-print("Goodbye!")
-logging.info("Exitting...")
-exit(0)
+
+def goodbye():
+    print("Goodbye!")
+    logging.info("Exitting...")
+
+atexit.register(goodbye)
