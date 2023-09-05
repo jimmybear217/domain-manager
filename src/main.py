@@ -110,10 +110,15 @@ def goodbye():
     print("Goodbye!")
     logging.info("Exitting...")
 
-# signal.signal(signal.SIGINT, goodbye)
-# signal.signal(signal.SIGTERM, goodbye)
-
 atexit.register(goodbye)
+
+def sigterm_handler(_signo, _stack_frame):
+    print("Receving SIGTERM, exiting...")
+    logging.info("Receving SIGTERM, exiting...")
+    exit(0)
+
+signal.signal(signal.SIGTERM, sigterm_handler)
+
 
 # run webserver
 print("Starting webserver on interface " + webserverHost + " and port " + str(webserverPort) + "...")
