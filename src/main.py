@@ -1,18 +1,10 @@
 # load configuration
-
 import config
 if (config.doesConfigExist() == False):
     print("Config file not found, creating...")
     config.writeConfig()
     print("Config file created, please edit it and run the program again.")
 config.loadConfig()
-
-# set variables
-test_whoisDomain = config.get("test_whoisDomain")
-test_whoisLocation = config.get("test_whoisLocation")
-webserverPort = config.get("webserverPort")
-webserverHost = config.get("webserverHost")
-mainDatabaseFile = config.get("mainDatabaseFile")
 
 # setup logging
 import logging
@@ -25,10 +17,18 @@ from waitress import serve
 import sqlite3
 import os
 import atexit
+import signal
 
 #import custom packages
 import webserver as webserver
 import encryption
+
+# set variables
+test_whoisDomain = config.get("test_whoisDomain")
+test_whoisLocation = config.get("test_whoisLocation")
+webserverPort = config.get("webserverPort")
+webserverHost = config.get("webserverHost")
+mainDatabaseFile = config.get("mainDatabaseFile")
 
 # tests
 logging.debug("Testing whois...")
@@ -104,14 +104,19 @@ if (sqliteCursor.execute("SELECT COUNT(*) AS CNTREC FROM pragma_table_info('doma
 
 sqliteHandle.close()
 
-# run webserver
-print("Starting webserver on interface " + webserverHost + " and port " + str(webserverPort) + "...")
-logging.info("Starting webserver on interface " + webserverHost + " and port " + str(webserverPort) + "...")
-# webserver.app.run(host=webserverHost, port=webserverPort, debug=True)
-serve(webserver.app, host=webserverHost, port=webserverPort)
+# set exit procedure
 
 def goodbye():
     print("Goodbye!")
     logging.info("Exitting...")
 
+# signal.signal(signal.SIGINT, goodbye)
+# signal.signal(signal.SIGTERM, goodbye)
+
 atexit.register(goodbye)
+
+# run webserver
+print("Starting webserver on interface " + webserverHost + " and port " + str(webserverPort) + "...")
+logging.info("Starting webserver on interface " + webserverHost + " and port " + str(webserverPort) + "...")
+# webserver.app.run(host=webserverHost, port=webserverPort, debug=True)
+serve(webserver.app, host=webserverHost, port=webserverPort)
