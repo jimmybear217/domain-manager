@@ -113,8 +113,8 @@ def goodbye():
 atexit.register(goodbye)
 
 def sigterm_handler(_signo, _stack_frame):
-    print("Receving SIGTERM, exiting...")
-    logging.info("Receving SIGTERM, exiting...")
+    print("Receved SIGTERM, exiting...")
+    logging.info("Receved SIGTERM, exiting...")
     exit(0)
 
 signal.signal(signal.SIGTERM, sigterm_handler)
