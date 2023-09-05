@@ -106,7 +106,11 @@ def toLocateDateTime(timestamp):
 
     if (type(timestamp) != str):
         timestamp = str(timestamp)
-    return datetime.datetime.fromisoformat(timestamp).astimezone().strftime("%m/%d/%Y")
+    try:    
+        returnValue = datetime.datetime.fromisoformat(timestamp).astimezone().strftime("%m/%d/%Y")
+    except:
+        returnValue = timestamp
+    return returnValue
 
 
 # whois list ("My Domains" page)
