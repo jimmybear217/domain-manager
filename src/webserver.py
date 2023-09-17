@@ -42,7 +42,7 @@ app.secret_key = secretKey
 def index():
     app.logger.debug("Index page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     return render_template("index.html", title='Home')
 
@@ -118,7 +118,7 @@ def toLocateDateTime(timestamp):
 def whois_list():
     app.logger.debug("Whois List page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     if request.args.get('domain') != None:
@@ -143,7 +143,7 @@ def whois_list():
 def whois_start():
     app.logger.debug("Whois Query page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     domain = ""
@@ -161,7 +161,7 @@ def whois_start():
 def whois_refresh():
     app.logger.debug("Whois Refresh page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     if request.args.get('domain') != None:
@@ -202,7 +202,7 @@ def whois_refresh():
 def whois_delete():
     app.logger.debug("Whois delete page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     if request.args.get('domain') != None:
@@ -223,7 +223,7 @@ def is_ip_address(ip_address):
 def dns_lookup():
     app.logger.debug("DNS Lookup page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     if request.args.get('domain') != None:
@@ -257,7 +257,7 @@ def dns_lookup():
 def security_menu():
     app.logger.debug("Security menu page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     return render_template("security.html")
@@ -267,7 +267,7 @@ def security_menu():
 def security_virustotal():
     app.logger.debug("VirusTotal page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     domain = ""
@@ -336,7 +336,7 @@ def security_virustotal():
 def security_certs():
     app.logger.debug("certs page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
 
     # gather domain input
@@ -376,7 +376,7 @@ def security_certs():
 def security_shodan_internetdb():
     app.logger.debug("Shodan InternetDB page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     # gather ip input
@@ -403,7 +403,7 @@ def security_shodan_internetdb():
 def security_urlscan():
     app.logger.debug("urlscan page requested from " + request.remote_addr + " as user " + session.get("user", "anonymous"))
     if (checkLogin() == False):
-        app.logger.warning("User not logged in, redirecting to login page.")
+        app.logger.warning("User from " + request.remote_addr + " not logged in, redirecting to login page.")
         return redirect(url_for("login"))
     
     # gather domain input
